@@ -1,0 +1,94 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context="uk.appinvent.popularmovies.DetailsActivity$PlaceholderFragment">
+
+<ScrollView
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+        <ImageView
+            android:layout_width="170dp" android:id="@+id/movie_poster"
+            android:layout_height="wrap_content" android:src="@drawable/img_movie"
+            android:layout_below="@+id/linearLayout"
+            android:layout_marginTop="15dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="20dp"
+            />
+
+        <LinearLayout
+            android:layout_width="fill_parent" android:background="@color/title_bg_color"
+            android:layout_height="100dp"
+            android:id="@+id/linearLayout">
+
+            <TextView android:text="Title" android:id="@+id/movie_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:textSize="24sp"
+                android:textColor="@color/title_wh_color"
+                android:layout_gravity="bottom" android:layout_marginBottom="10dp" android:layout_marginLeft="20dp"
+                />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content" android:text="2015" android:textSize="16sp"
+            android:layout_height="wrap_content" android:id="@+id/movie_release_date"
+
+            android:layout_marginTop="20dp"
+            android:layout_alignTop="@+id/movie_poster"
+            android:layout_toRightOf="@+id/movie_poster"
+            android:layout_toEndOf="@+id/movie_poster" />
+
+        <!--<TextView-->
+            <!--android:layout_width="wrap_content" android:text="120 min" android:textSize="15dp"-->
+            <!--android:layout_marginTop="45dp"-->
+            <!--android:layout_alignTop="@+id/movie_poster"-->
+            <!--android:layout_toRightOf="@+id/movie_poster"-->
+            <!--android:layout_toEndOf="@+id/movie_poster"-->
+            <!--android:layout_height="wrap_content" android:id="@+id/movie_length" />-->
+
+        <RatingBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:id="@+id/movie_rating_bar"
+            android:layout_alignTop="@+id/movie_poster"
+            android:layout_toRightOf="@+id/movie_poster"
+            android:layout_toEndOf="@+id/movie_poster"
+            android:layout_marginTop="50dp"
+            style="?android:attr/ratingBarStyleIndicator"
+            android:numStars="5"
+            android:rating="4"
+            android:stepSize="1.0" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="8.7/10" android:textSize="10dp" android:id="@+id/movie_rating"
+            android:layout_alignTop="@+id/movie_poster"
+            android:layout_toRightOf="@+id/movie_poster"
+            android:layout_toEndOf="@+id/movie_poster"
+            android:layout_marginTop="100dp"
+
+            />
+
+        <TextView
+            android:id="@+id/movie_plot"
+            android:text="this is really a long text.."
+
+            android:layout_width="fill_parent"
+
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/movie_poster"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+    </RelativeLayout>
+    </ScrollView>
+
+</RelativeLayout>
