@@ -25,6 +25,7 @@ public class Movie implements Parcelable  {
      String releaseDate;
 
     String runtime;
+    double popularity;
 
     public String getTitle() {
         return title;

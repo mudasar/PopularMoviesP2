@@ -29,30 +29,33 @@ import uk.appinvent.popularmovies.data.MovieContract;
 /**
  * Created by mudasar on 10/07/2015.
  */
-public class LoadMoviesTask extends AsyncTask<String,String, ArrayList<Movie>> {
+public class LoadMoviesTask extends AsyncTask<String,Void, Void> {
 
     private final static String API_BASE_URL = "api.themoviedb.org";
-    private static final String API_URL = "3/movie/";
-    private String api_method;
+    private static final String API_URL = "3/discover/movie";
+    private static final String API_DETAIL_URL = "3/movie/";
+    private String sort_method;
     //popular
     private final static String API_KEY ="d1ef9dc0336bed3f42aa90354fdc4abf";
 
     private static final String LOG_TAG = LoadMoviesTask.class.getName();
-    private OnTaskCompleted listener;
+
     private Context mContext ;
 
-    public LoadMoviesTask(Context context,  OnTaskCompleted listener) {
+    public LoadMoviesTask(Context context) {
         mContext = context;
-        this.listener = listener;
     }
 
     private String makeAPIUrl(String sortOrder){
-        api_method =    sortOrder;
+        sort_method =    sortOrder;
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https");
         builder.authority(API_BASE_URL);
-        builder.appendEncodedPath(API_URL + api_method);
+        builder.appendEncodedPath(API_URL);
+        //builder.appendQueryParameter("year", "2015");
+        //builder.appendQueryParameter("sort_by", sort_method + ".asc");
         builder.appendQueryParameter("api_key", API_KEY);
+
         Uri url = builder.build();
         return url.toString();
     }
@@ -62,28 +65,15 @@ public class LoadMoviesTask extends AsyncTask<String,String, ArrayList<Movie>> {
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https");
         builder.authority(API_BASE_URL);
-        builder.appendEncodedPath(API_URL + movieId + "/" + type);
+        builder.appendEncodedPath(API_DETAIL_URL + movieId + "/" + type);
         builder.appendQueryParameter("api_key", API_KEY);
         Uri url = builder.build();
         return url.toString();
     }
 
-    /**
-     * Override this method to perform a computation on a background thread. The
-     * specified parameters are the parameters passed to {@link #execute}
-     * by the caller of this task.
-     * <p/>
-     * This method can call {@link #publishProgress} to publish updates
-     * on the UI thread.
-     *
-     * @param params The parameters of the task.
-     * @return A result, defined by the subclass of this task.
-     * @see #onPreExecute()
-     * @see #onPostExecute
-     * @see #publishProgress
-     */
+
     @Override
-    protected ArrayList<Movie> doInBackground(String... params) {
+    protected Void doInBackground(String... params) {
 
         String sortOrder = params[0];
 
@@ -121,6 +111,7 @@ public class LoadMoviesTask extends AsyncTask<String,String, ArrayList<Movie>> {
                     movieValues.put(MovieContract.Movie.PLOT, movie.plot);
                     movieValues.put(MovieContract.Movie.POSTER, movie.posterPath);
                     movieValues.put(MovieContract.Movie.RELEASE_DATE, movie.releaseDate);
+                    movieValues.put(MovieContract.Movie.POPULARITY, movie.popularity);
                     movieValues.put(MovieContract.Movie.VOTE_AVERAGE, movie.userRating);
 
                     Uri insertedUri =  mContext.getContentResolver().insert(MovieContract.Movie.CONTENT_URI, movieValues);
@@ -139,7 +130,7 @@ public class LoadMoviesTask extends AsyncTask<String,String, ArrayList<Movie>> {
                 movieCursor.close();
             }
             //insert this data in database
-            return movieList;
+            //return movieList;
         }
 
         return null;
@@ -280,22 +271,5 @@ public class LoadMoviesTask extends AsyncTask<String,String, ArrayList<Movie>> {
             }
         }
         return jsonData;
-    }
-
-    /**
-     * <p>Runs on the UI thread after {@link #doInBackground}. The
-     * specified result is the value returned by {@link #doInBackground}.</p>
-     * <p/>
-     * <p>This method won't be invoked if the task was cancelled.</p>
-     *
-     * @param movies The result of the operation computed by {@link #doInBackground}.
-     * @see #onPreExecute
-     * @see #doInBackground
-     * @see #onCancelled(Object)
-     */
-    @Override
-    protected void onPostExecute(ArrayList<Movie> movies) {
-        super.onPostExecute(movies);
-        listener.onTaskCompleted(movies);
     }
 }

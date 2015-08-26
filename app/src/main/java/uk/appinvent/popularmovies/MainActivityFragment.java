@@ -1,16 +1,21 @@
 package uk.appinvent.popularmovies;
 
+import android.app.Fragment;
+import android.app.LoaderManager;
 import android.app.SharedElementCallback;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.preference.Preference;
 import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
+
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -30,11 +35,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import uk.appinvent.popularmovies.data.MovieContract;
+
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainActivityFragment extends Fragment implements OnTaskCompleted {
+public class MainActivityFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String LOG_TAG = MainActivityFragment.class.getName();
     public static final String DETAIL_ID = "DETAIL_ID";
@@ -44,10 +51,11 @@ public class MainActivityFragment extends Fragment implements OnTaskCompleted {
     private final static String API_KEY ="d1ef9dc0336bed3f42aa90354fdc4abf";
     private static final String IMAGE_BASE_URL = "http://image.tmdb.org/t/p/";
 
-    private String api_method;
+
+    private static final int MOVIES_LOADER = 0;
     SharedPreferences preferences;
     ImageAdapter imageAdapter;
-    ArrayList<Movie> movies = new ArrayList<Movie>();
+
 
     public MainActivityFragment() {
     }
@@ -57,14 +65,6 @@ public class MainActivityFragment extends Fragment implements OnTaskCompleted {
         preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         super.onCreate(savedInstanceState);
         // Add this line in order for this fragment to handle menu events.
-        if (savedInstanceState != null){
-            movies = savedInstanceState.getParcelableArrayList("movies");
-            //Automatic refresh of movies list after setting is updated
-            String savedApiMethod = savedInstanceState.getString("api_method");
-            autoRefreshMovies(savedApiMethod);
-        }else {
-            executeAsyncTask();
-        }
         setHasOptionsMenu(true);
     }
 
@@ -80,7 +80,7 @@ public class MainActivityFragment extends Fragment implements OnTaskCompleted {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
-            executeAsyncTask();
+            updateMovies();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -89,59 +89,54 @@ public class MainActivityFragment extends Fragment implements OnTaskCompleted {
     @Override
     public void onStart() {
         super.onStart();
-    }
-
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        autoRefreshMovies(api_method);
         updateMovies();
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        outState.putParcelableArrayList("movies", movies);
-        outState.putString("api_method",api_method);
-        super.onSaveInstanceState(outState);
+    public void onActivityCreated(Bundle savedInstanceState) {
+        getLoaderManager().initLoader(MOVIES_LOADER,null,this);
+        super.onActivityCreated(savedInstanceState);
     }
 
 
-    @Override
-    public void onViewStateRestored(Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-        if (savedInstanceState != null){
-            movies = savedInstanceState.getParcelableArrayList("movies");
-        }
-    }
+//        @Override
+//    public void onResume() {
+//        super.onResume();
+//        updateMovies();
+//    }
 
-    private void autoRefreshMovies(String savedApiMethod){
-
-        String configApiMethod = preferences.getString(getString(R.string.sort_order_key),"popular");
-        if (savedApiMethod != null && savedApiMethod != configApiMethod){
-            executeAsyncTask();
-        }
-    }
-
-    private void executeAsyncTask(){
-        LoadMoviesTask loadMoviesTask = new LoadMoviesTask(getActivity().getApplication(),this);
-        AsyncTask<String, String, ArrayList<Movie>> task = loadMoviesTask.execute(preferences.getString(getString(R.string.sort_order_key), "popular"));
-    }
+//
+//    private void autoRefreshMovies(String savedApiMethod){
+//
+//        String configApiMethod = preferences.getString(getString(R.string.sort_order_key),"popular");
+//        if (savedApiMethod != null && savedApiMethod != configApiMethod){
+//            executeAsyncTask();
+//        }
+//    }
 
     private void updateMovies(){
-        if (movies != null) {
-            for (Movie movie : movies) {
-                //set image path
-                movie.setPosterPath(IMAGE_BASE_URL + "w500" + movie.getPosterPath());
-            }
-            imageAdapter.moviesList.clear();
-            imageAdapter.moviesList.addAll(movies);
-        }
+        LoadMoviesTask loadMoviesTask = new LoadMoviesTask(getActivity().getApplication());
+        loadMoviesTask.execute(preferences.getString(getString(R.string.sort_order_key), getString(R.string.sort_order_default)));
     }
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        String sortOrderSetting = Utility.getPreferredSortOrder(getActivity());
+
+        // Sort order:  Ascending, by date.
+
+        String sortOrder = sortOrderSetting + " ASC";
+        Cursor cur = getActivity().getContentResolver().query(MovieContract.Movie.CONTENT_URI,
+                null, null, null, sortOrder);
+
+        // The CursorAdapter will take data from our cursor and populate the ListView
+        // However, we cannot use FLAG_AUTO_REQUERY since it is deprecated, so we will end
+        // up with an empty list the first time we run.
+        imageAdapter = new ImageAdapter(getActivity(), cur, 0);
 
         View rootView =inflater.inflate(R.layout.fragment_movies, container, false);
 
@@ -149,21 +144,22 @@ public class MainActivityFragment extends Fragment implements OnTaskCompleted {
 
         final Context appContext = this.getActivity().getApplicationContext();
 
-        List<Movie> movies = new ArrayList<Movie>();
-
-
-        imageAdapter = new ImageAdapter(appContext, movies);
+        imageAdapter = new ImageAdapter(appContext, cur, 0);
 
         gridview.setAdapter(imageAdapter);
 
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Movie movie = (Movie) imageAdapter.getItem(position);
-                Intent detailIntent = new Intent(appContext, DetailsActivity.class);
-                detailIntent.putExtra("movie", movie);
 
-                startActivity(detailIntent);
+                Cursor cursor = (Cursor) parent.getItemAtPosition(position);
+                if (cursor != null) {
+
+                    Intent intent = new Intent(getActivity(), DetailsActivity.class)
+                            .setData(MovieContract.Movie.buildMovieUri(cursor.getLong(0)));
+
+                    startActivity(intent);
+                }
             }
         });
 
@@ -171,11 +167,24 @@ public class MainActivityFragment extends Fragment implements OnTaskCompleted {
     }
 
 
+
     @Override
-    public void onTaskCompleted(ArrayList<Movie> movieList) {
-        movies = movieList;
-        updateMovies();
-        // Have to call explicitly to make it work on first load
-        imageAdapter.notifyDataSetChanged();
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        String sortOrderSetting = Utility.getPreferredSortOrder(getActivity());
+
+        // Sort order:  Ascending, by date.
+
+        String sortOrder = sortOrderSetting + " ASC";
+        return new CursorLoader(getActivity(), MovieContract.Movie.CONTENT_URI, null, null, null, sortOrder);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        imageAdapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        imageAdapter.swapCursor(null);
     }
 }

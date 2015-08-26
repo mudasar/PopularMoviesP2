@@ -46,12 +46,15 @@ public class MovieContract  {
          */
         public static final String TITLE = "title";
 
+
         /**
          * release date of movie. For instance, 12/11/2014.
          */
         public static final String RELEASE_DATE = "release_date";
 
         public static final String POSTER = "poster";
+
+        public static final String POPULARITY = "popularity";
 
         public static final String VOTE_AVERAGE = "vote_average";
 

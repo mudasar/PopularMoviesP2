@@ -30,6 +30,7 @@ public class MovieDbHelper extends SQLiteOpenHelper {
             + Movie.TMDB_ID + " TEXT NOT NULL, "
             + Movie.RELEASE_DATE + " INTEGER NOT NULL, "
             + Movie.POSTER + " TEXT NOT NULL, "
+            + Movie.POPULARITY + " REAL NOT NULL, "
             + Movie.VOTE_AVERAGE + " REAL NOT NULL, "
             + Movie.PLOT + " TEXT NOT NULL "
             + " );";
