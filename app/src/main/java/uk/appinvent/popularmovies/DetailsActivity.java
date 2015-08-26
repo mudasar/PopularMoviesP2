@@ -32,57 +32,8 @@ public class DetailsActivity extends ActionBarActivity {
         setContentView(R.layout.activity_details);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
+                    .add(R.id.container, new DetailsFragment())
                     .commit();
-        }
-    }
-
-
-
-
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-
-        public PlaceholderFragment() {
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_details, container, false);
-
-            Intent pIntent = getActivity().getIntent();
-
-            Movie movie = pIntent.getParcelableExtra("movie");
-
-            if (movie != null){
-                TextView titleView = (TextView) rootView.findViewById(R.id.movie_title);
-                titleView.setText(movie.title);
-
-
-                TextView plotView = (TextView) rootView.findViewById(R.id.movie_plot);
-                plotView.setText(movie.plot);
-
-                TextView releaseDateView = (TextView) rootView.findViewById(R.id.movie_release_date);
-                releaseDateView.setText(movie.releaseDate);
-
-                ImageView imageView = (ImageView) rootView.findViewById(R.id.movie_poster);
-                Picasso.with(rootView.getContext()).load(movie.posterPath).into(imageView);
-
-                TextView ratingText = (TextView) rootView.findViewById(R.id.movie_rating);
-                ratingText.setText(movie.userRating + " / 10");
-
-                RatingBar ratingBar = (RatingBar) rootView.findViewById(R.id.movie_rating_bar);
-                ratingBar.setRating((float) movie.userRating / 2);
-            }
-
-            //TODO:  parse into int  create a new a sync task to load movie
-
-            //TODO: implement search and settings
-
-            return rootView;
         }
     }
 }

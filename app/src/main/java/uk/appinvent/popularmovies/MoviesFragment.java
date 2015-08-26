@@ -1,24 +1,16 @@
 package uk.appinvent.popularmovies;
 
-import android.app.Fragment;
-import android.app.LoaderManager;
-import android.app.SharedElementCallback;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.Loader;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.database.Cursor;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Build;
-import android.preference.Preference;
 import android.preference.PreferenceManager;
-
+import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Gravity;
+
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -27,13 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.Toast;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import uk.appinvent.popularmovies.data.MovieContract;
 
@@ -41,23 +27,18 @@ import uk.appinvent.popularmovies.data.MovieContract;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainActivityFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class MoviesFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private static final String LOG_TAG = MainActivityFragment.class.getName();
-    public static final String DETAIL_ID = "DETAIL_ID";
-    private final static String API_BASE_URL = "api.themoviedb.org";
-    private static final String API_URL = "3/movie/";
-    //popular
-    private final static String API_KEY ="d1ef9dc0336bed3f42aa90354fdc4abf";
-    private static final String IMAGE_BASE_URL = "http://image.tmdb.org/t/p/";
-
+    private static final String LOG_TAG = MoviesFragment.class.getName();
 
     private static final int MOVIES_LOADER = 0;
     SharedPreferences preferences;
     ImageAdapter imageAdapter;
+    boolean isLoaded = false;
+    String savedSortOrder;
 
 
-    public MainActivityFragment() {
+    public MoviesFragment() {
     }
 
     @Override
@@ -65,7 +46,27 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         super.onCreate(savedInstanceState);
         // Add this line in order for this fragment to handle menu events.
+        if (savedInstanceState == null){
+            savedSortOrder = Utility.getPreferredSortOrder(getActivity());
+        }else {
+            savedSortOrder = savedInstanceState.getString("saved-sort-order");
+        }
+
         setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putString("saved-sort-order", savedSortOrder);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onViewStateRestored(Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if (savedInstanceState != null){
+            savedSortOrder = savedInstanceState.getString("saved-sort-order");
+        }
     }
 
     @Override
@@ -94,32 +95,22 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-        getLoaderManager().initLoader(MOVIES_LOADER,null,this);
+        getLoaderManager().initLoader(MOVIES_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
     }
 
-
-//        @Override
-//    public void onResume() {
-//        super.onResume();
-//        updateMovies();
-//    }
-
-//
-//    private void autoRefreshMovies(String savedApiMethod){
-//
-//        String configApiMethod = preferences.getString(getString(R.string.sort_order_key),"popular");
-//        if (savedApiMethod != null && savedApiMethod != configApiMethod){
-//            executeAsyncTask();
-//        }
-//    }
-
     private void updateMovies(){
-        LoadMoviesTask loadMoviesTask = new LoadMoviesTask(getActivity().getApplication());
-        loadMoviesTask.execute(preferences.getString(getString(R.string.sort_order_key), getString(R.string.sort_order_default)));
+        if (!isLoaded){
+            LoadMoviesTask loadMoviesTask = new LoadMoviesTask(getActivity().getApplication());
+            loadMoviesTask.execute(preferences.getString(getString(R.string.sort_order_key), getString(R.string.sort_order_default)));
+            isLoaded = true;
+        }
+
+        //reload the loaderManager if sort order is changed
+        if (savedSortOrder != null && savedSortOrder != Utility.getPreferredSortOrder(getActivity())){
+            getLoaderManager().restartLoader(MOVIES_LOADER, null, this);
+        }
     }
-
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -166,16 +157,16 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         return rootView;
     }
 
-
-
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String sortOrderSetting = Utility.getPreferredSortOrder(getActivity());
 
-        // Sort order:  Ascending, by date.
+    String sortOrderSetting = Utility.getPreferredSortOrder(getActivity());
 
-        String sortOrder = sortOrderSetting + " ASC";
-        return new CursorLoader(getActivity(), MovieContract.Movie.CONTENT_URI, null, null, null, sortOrder);
+    // Sort order:  Ascending, by date.
+
+    String sortOrder = sortOrderSetting + " ASC";
+    return new CursorLoader(getActivity(), MovieContract.Movie.CONTENT_URI, null, null, null, sortOrder);
+
     }
 
     @Override
@@ -187,4 +178,5 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     public void onLoaderReset(Loader<Cursor> loader) {
         imageAdapter.swapCursor(null);
     }
+
 }
