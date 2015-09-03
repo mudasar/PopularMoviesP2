@@ -32,6 +32,7 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
     private static final String LOG_TAG = MoviesFragment.class.getName();
 
     private static final int MOVIES_LOADER = 0;
+
     SharedPreferences preferences;
     ImageAdapter imageAdapter;
     boolean isLoaded = false;

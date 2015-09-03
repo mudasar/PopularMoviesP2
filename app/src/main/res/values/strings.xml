@@ -19,4 +19,8 @@
         <item>popularity</item>
         <item>vote_average</item>
     </string-array>
+
+    <string name="favourite_button_title">MARK AS FAVOURITE</string>
+    <string name="trailer_title">Trailers</string>
+    <string name="reviews_title">Reviews</string>
 </resources>

@@ -29,18 +29,24 @@ public class MoviesProvider extends ContentProvider {
     static final int VIDEO_ID = 301;
     static final int VIDEO_WITH_MOVIE = 302;
 
-
+    static String MOVIE_SELECTION_BY_ID = Movie.TABLE_NAME + "." + Movie._ID + " = ?";
 
     private static UriMatcher buildUriMatcher(){
         UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         matcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_MOVIE, MOVIE);
+
         matcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_MOVIE + "/#", MOVIE_ID);
+
+        matcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_REVIEW + "/*/#", REVIEW_WITH_MOVIE);
         matcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_REVIEW, REVIEW);
+
         matcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_REVIEW + "/#", REVIEW_ID);
 
 
+        matcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_VIDEO + "/*/#", VIDEO_WITH_MOVIE);
         matcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_VIDEO, VIDEO);
         matcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_VIDEO + "/#", VIDEO_ID);
+
 
 
         return matcher;
@@ -51,6 +57,19 @@ public class MoviesProvider extends ContentProvider {
     public boolean onCreate() {
         mOpenHelper = new MovieDbHelper(getContext());
         return true;
+    }
+
+    public Cursor getVideosByMovieId(Uri uri, String[] projection, String sortOrder){
+
+        Long movieId = Video.getMovieIdFromUri(uri);
+
+        return mOpenHelper.getReadableDatabase().query(Video.TABLE_NAME, projection,
+                MovieContract.Video.TABLE_NAME + "." + MovieContract.Video.MOVIE_ID +  " = ?",
+                new String[] {Long.toString(movieId)},
+                null,
+                null,
+                sortOrder
+                );
     }
 
     @Override
@@ -73,18 +92,45 @@ public class MoviesProvider extends ContentProvider {
                 retCursor = mOpenHelper.getReadableDatabase().query(Movie.TABLE_NAME, projection, selection, selectionArgs, null,null, sortOrder);
                 break;
             }
+            case MOVIE_ID:{
+
+                retCursor = mOpenHelper.getReadableDatabase().query(
+                        Movie.TABLE_NAME,
+                        projection,
+                        MOVIE_SELECTION_BY_ID,
+                        new String[]{ Long.toString(Movie.getMovieIdFromUri(uri)) },
+                        null,
+                        null,
+                        sortOrder);
+                break;
+            }
             // "Review"
             case REVIEW: {
-                retCursor = mOpenHelper.getReadableDatabase().query(Review.TABLE_NAME, projection, selection, selectionArgs, null,null, sortOrder);
+                Long movieId = Review.getMovieIdFromUri(uri);
+                if (movieId != 0){
+                    String reviewSelection = Review.TABLE_NAME + "." + Review.MOVIE_ID + " = ?";
+                    retCursor = mOpenHelper.getReadableDatabase().query(Review.TABLE_NAME, projection, reviewSelection, new String[]{Long.toString(movieId)}, null,null, sortOrder);
+                }else   {
+                    retCursor = mOpenHelper.getReadableDatabase().query(Review.TABLE_NAME, projection, selection, selectionArgs, null,null, sortOrder);
+                }
+
+
                 break;
             }
 
             case VIDEO: {
-                retCursor = mOpenHelper.getReadableDatabase().query(Video.TABLE_NAME, projection, selection, selectionArgs, null,null, sortOrder);
+                Long movieId = Video.getMovieIdFromUri(uri);
+                if (movieId != 0){
+                    String videoSelection = Video.TABLE_NAME + "." + Video.MOVIE_ID + " = ?";
+                    retCursor = mOpenHelper.getReadableDatabase().query(Video.TABLE_NAME, projection, videoSelection, new String[]{Long.toString(movieId)}, null,null, sortOrder);
+                }else {
+                    retCursor = mOpenHelper.getReadableDatabase().query(Video.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+                }
                 break;
             }
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
+
         }
         retCursor.setNotificationUri(getContext().getContentResolver(), uri);
         return retCursor;

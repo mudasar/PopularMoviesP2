@@ -20,7 +20,6 @@ import uk.appinvent.popularmovies.data.MovieContract;
  */
 public class ImageAdapter extends CursorAdapter {
 
-    private static final String IMAGE_BASE_URL = "http://image.tmdb.org/t/p/";
     Context context;
 
 
@@ -42,7 +41,7 @@ public class ImageAdapter extends CursorAdapter {
         ImageView imageView = (ImageView) view.findViewById(R.id.move_poster_image);
         int poster_idx = cursor.getColumnIndex(MovieContract.Movie.POSTER);
         String poster_path = cursor.getString(poster_idx);
-        String full_poster_path = IMAGE_BASE_URL + "w500" + poster_path;
+        String full_poster_path = Utility.getPosterPath("w500" , poster_path);
         Picasso.with(context).load(full_poster_path).into(imageView);
     }
 }

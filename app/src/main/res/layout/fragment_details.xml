@@ -1,4 +1,4 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
@@ -44,14 +44,6 @@
             android:layout_toRightOf="@+id/movie_poster"
             android:layout_toEndOf="@+id/movie_poster" />
 
-        <!--<TextView-->
-            <!--android:layout_width="wrap_content" android:text="120 min" android:textSize="15dp"-->
-            <!--android:layout_marginTop="45dp"-->
-            <!--android:layout_alignTop="@+id/movie_poster"-->
-            <!--android:layout_toRightOf="@+id/movie_poster"-->
-            <!--android:layout_toEndOf="@+id/movie_poster"-->
-            <!--android:layout_height="wrap_content" android:id="@+id/movie_length" />-->
-
         <RatingBar
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" android:id="@+id/movie_rating_bar"
@@ -74,6 +66,14 @@
 
             />
 
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/movie_poster"
+            android:layout_toRightOf="@+id/movie_poster"
+            android:layout_toEndOf="@+id/movie_poster"
+            android:layout_marginTop="120dp" android:text="@string/favourite_button_title"
+            />
         <TextView
             android:id="@+id/movie_plot"
             android:text="this is really a long text.."
@@ -87,8 +87,69 @@
             android:layout_below="@+id/movie_poster"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_below="@+id/movie_plot"
+            android:layout_height="1dp"
+            android:background="#000000" >
+        </View>
+
+        <TextView
+            android:layout_marginTop="10dp"
+            android:layout_below="@id/movie_plot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/trailer_title_text_view"
+            android:text="@string/trailer_title"
+            android:textSize="24sp"
+
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="10dp"
+
+            />
+
+        <ListView
+            android:layout_marginTop="10dp"
+            android:layout_below="@id/trailer_title_text_view"
+            android:id="@+id/videos_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:divider="@color/item_divider_color"
+            android:dividerHeight="2dp"
+            >
+
+        </ListView>
+
+
+        <TextView
+            android:layout_marginTop="10dp"
+            android:layout_below="@id/videos_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/reviews_title_text_view"
+            android:text="@string/reviews_title"
+            android:textSize="24sp"
+
+            android:layout_gravity="bottom" android:layout_marginBottom="10dp" android:layout_marginLeft="10dp"
+
+            />
+
+        <ListView
+            android:layout_marginTop="10dp"
+            android:layout_below="@id/reviews_title_text_view"
+            android:id="@+id/reviews_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:divider="@color/item_divider_color"
+            android:dividerHeight="2dp"
+            >
+
+        </ListView>
 
     </RelativeLayout>
     </ScrollView>
 
-</RelativeLayout>
+</LinearLayout>

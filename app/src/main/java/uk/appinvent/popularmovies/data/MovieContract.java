@@ -92,6 +92,10 @@ public class MovieContract  {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
 
+        public static long getMovieIdFromUri(Uri uri) {
+            return Long.parseLong(uri.getPathSegments().get(1));
+        }
+
     }
 
     public static final class Video  implements BaseColumns{
@@ -153,11 +157,16 @@ public class MovieContract  {
         }
 
         public static Uri buildVideoUriWithMovieId(long movieId){
-            return CONTENT_URI.buildUpon().appendPath(Long.toString(movieId)).build();
+            return CONTENT_URI.buildUpon().appendQueryParameter(MOVIE_ID, Long.toString(movieId)).build();
         }
 
         public static long getMovieIdFromUri(Uri uri) {
-            return Long.parseLong(uri.getPathSegments().get(1));
+
+            String movieIdString = uri.getQueryParameter(MOVIE_ID);
+            if (null != movieIdString && movieIdString.length() > 0)
+                return Long.parseLong(movieIdString);
+            else
+                return 0;
         }
 
     }
@@ -217,11 +226,15 @@ public class MovieContract  {
 
 
         public static Uri buildReviewUriWithMovieId(long movieId){
-            return CONTENT_URI.buildUpon().appendPath(Long.toString(movieId)).build();
+            return CONTENT_URI.buildUpon().appendQueryParameter(MOVIE_ID, Long.toString(movieId)).build();
         }
 
         public static long getMovieIdFromUri(Uri uri) {
-            return Long.parseLong(uri.getPathSegments().get(1));
+            String movieIdString = uri.getQueryParameter(MOVIE_ID);
+            if (null != movieIdString && movieIdString.length() > 0)
+                return Long.parseLong(movieIdString);
+            else
+                return 0;
         }
 
     }
