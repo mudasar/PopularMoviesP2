@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RatingBar;
@@ -29,6 +30,8 @@ import uk.appinvent.popularmovies.data.MoviesProvider;
 public class DetailsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String LOG_TAG = DetailsFragment.class.getName();
+
+    private long movieId = 0;
 
     private static final int DETAIL_LOADER = 0;
     private static final int VIDEOS_LOADER = 1;
@@ -76,6 +79,9 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
         return rootView;
     }
 
+
+
+
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
@@ -85,6 +91,7 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
             return null;
         }
 
+        movieId = MovieContract.Movie.getMovieIdFromUri(intent.getData());
 
         switch (id){
             case DETAIL_LOADER:
@@ -100,8 +107,6 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
                 );
 
             case VIDEOS_LOADER:
-                Long movieId = MovieContract.Movie.getMovieIdFromUri(intent.getData());
-
                 return  new CursorLoader(
                         getActivity(),
                         MovieContract.Video.buildVideoUriWithMovieId(movieId),
@@ -112,9 +117,6 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
                 );
 
             case REVIEWS_LOADER:
-
-                 movieId = MovieContract.Movie.getMovieIdFromUri(intent.getData());
-
                 return  new CursorLoader(
                         getActivity(),
                         MovieContract.Review.buildReviewUriWithMovieId(movieId),
@@ -158,6 +160,29 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
                 RatingBar ratingBar = (RatingBar) getView().findViewById(R.id.movie_rating_bar);
                 ratingBar.setRating((float) data.getDouble(COL_MOVIE_VOTE_AVERAGE) / 2);
 
+                if (movieId != 0){
+                    Button favButton = (Button) getView().findViewById(R.id.fav_button);
+                    favButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (movieId != 0){
+                                if (Utility.isFavourite(getActivity(), movieId)){
+                                    // remove from fav
+                                    Utility.removeFavorite(getActivity(), movieId);
+                                }else{
+                                    //add to fav
+                                    Utility.addFavorite(getActivity(), movieId);
+                                }
+                            }
+                        }
+                    });
+                    if (Utility.isFavourite(getActivity(), movieId)){
+                        // show disabled button
+                        favButton.setText("Remove Favourite");
+                    }else{
+                        favButton.setText("Mark As Favourite");
+                    }
+                }
                 break;
             case VIDEOS_LOADER:
 

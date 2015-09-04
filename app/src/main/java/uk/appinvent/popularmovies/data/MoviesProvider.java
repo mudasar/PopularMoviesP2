@@ -72,6 +72,11 @@ public class MoviesProvider extends ContentProvider {
                 );
     }
 
+    public Cursor getFavouriteMovies(String[] selectionArgs){
+        return mOpenHelper.getReadableDatabase().rawQuery("SELECT " +Movie.TABLE_NAME + "." + Movie._ID + ", " + Movie.TABLE_NAME + "." + Movie.POSTER + " FROM " + Movie.TABLE_NAME + " WHERE " + Movie._ID + " IN (?)", selectionArgs);
+    }
+
+
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         Cursor retCursor;

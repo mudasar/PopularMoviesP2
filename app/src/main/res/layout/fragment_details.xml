@@ -73,7 +73,7 @@
             android:layout_toRightOf="@+id/movie_poster"
             android:layout_toEndOf="@+id/movie_poster"
             android:layout_marginTop="120dp" android:text="@string/favourite_button_title"
-            />
+            android:id="@+id/fav_button" />
         <TextView
             android:id="@+id/movie_plot"
             android:text="this is really a long text.."

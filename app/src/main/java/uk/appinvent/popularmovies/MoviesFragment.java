@@ -21,8 +21,12 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 
 
-import uk.appinvent.popularmovies.data.MovieContract;
+import com.google.common.base.Joiner;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import uk.appinvent.popularmovies.data.MovieContract;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -103,7 +107,11 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
     private void updateMovies(){
         if (!isLoaded){
             LoadMoviesTask loadMoviesTask = new LoadMoviesTask(getActivity().getApplication());
-            loadMoviesTask.execute(preferences.getString(getString(R.string.sort_order_key), getString(R.string.sort_order_default)));
+            String sortOrder = getString(R.string.sort_order_key);
+            if (sortOrder.equals("favourites")){
+                sortOrder =  getString(R.string.sort_order_default);
+            }
+            loadMoviesTask.execute(preferences.getString(sortOrder, getString(R.string.sort_order_default)));
             isLoaded = true;
         }
 
@@ -113,22 +121,12 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         }
     }
 
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        String sortOrderSetting = Utility.getPreferredSortOrder(getActivity());
-
-        // Sort order:  Ascending, by date.
-
-        String sortOrder = sortOrderSetting + " ASC";
-        Cursor cur = getActivity().getContentResolver().query(MovieContract.Movie.CONTENT_URI,
-                null, null, null, sortOrder);
-
-        // The CursorAdapter will take data from our cursor and populate the ListView
-        // However, we cannot use FLAG_AUTO_REQUERY since it is deprecated, so we will end
-        // up with an empty list the first time we run.
-        imageAdapter = new ImageAdapter(getActivity(), cur, 0);
 
         View rootView =inflater.inflate(R.layout.fragment_movies, container, false);
 
@@ -136,7 +134,7 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
 
         final Context appContext = this.getActivity().getApplicationContext();
 
-        imageAdapter = new ImageAdapter(appContext, cur, 0);
+        imageAdapter = new ImageAdapter(appContext, null, 0);
 
         gridview.setAdapter(imageAdapter);
 
@@ -165,9 +163,16 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
 
     // Sort order:  Ascending, by date.
 
-    String sortOrder = sortOrderSetting + " ASC";
-    return new CursorLoader(getActivity(), MovieContract.Movie.CONTENT_URI, null, null, null, sortOrder);
-
+        if (sortOrderSetting.equals("favourites")){
+            String sortOrder = getString(R.string.sort_order_default) + " ASC";
+            List<String> favMovies = Utility.getFavouriteMovies(getActivity());
+            String fav_selection = MovieContract.Movie._ID + " IN ( ? )";
+            String movieIds = Joiner.on(", ").join(favMovies);
+            return new CursorLoader(getActivity(), MovieContract.Movie.CONTENT_URI, null, fav_selection, new String[]{movieIds}, sortOrder);
+        }else{
+            String sortOrder = sortOrderSetting + " ASC";
+            return new CursorLoader(getActivity(), MovieContract.Movie.CONTENT_URI, null, null, null, sortOrder);
+        }
     }
 
     @Override

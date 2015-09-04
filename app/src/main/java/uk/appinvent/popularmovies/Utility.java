@@ -7,6 +7,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Created by mudasar on 25/08/15.
@@ -15,6 +21,64 @@ import android.widget.ListView;
 public class Utility {
 
     private static final String IMAGE_BASE_URL = "http://image.tmdb.org/t/p/";
+    private static final String PREF_FAV_KEY = "favourites";
+
+    public static List<String> getFavouriteMovies(Context context){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = prefs.edit();
+
+        Set<String> favourites = prefs.getStringSet(PREF_FAV_KEY, null);
+
+        if (favourites == null){
+            return new ArrayList<String>();
+        }
+        return new ArrayList<String >(favourites);
+    }
+
+    public static void addFavorite(Context context, long movieId) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = prefs.edit();
+
+        Set<String> favourites = prefs.getStringSet(PREF_FAV_KEY, null);
+
+        if (favourites == null){
+            favourites = new HashSet<String>();
+        }
+
+        if (!favourites.contains(Long.toString(movieId))){
+            favourites.add(Long.toString(movieId));
+
+            editor.putStringSet(PREF_FAV_KEY, favourites);
+            editor.commit();
+            Toast.makeText(context, "Added to favorite list", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public static boolean isFavourite(Context context, long movieId){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = prefs.edit();
+        Set<String> favourites = prefs.getStringSet(PREF_FAV_KEY, null);
+        if (favourites != null){
+            return favourites.contains(Long.toString(movieId));
+        }
+        return false;
+    }
+
+    public static void removeFavorite(Context context, long movieId) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = prefs.edit();
+
+        Set<String> favourites = prefs.getStringSet(PREF_FAV_KEY, null);
+        if (favourites == null){
+            favourites = new HashSet<String>();
+        }
+        if (!favourites.contains(Long.toString(movieId))){
+            favourites.remove(Long.toString(movieId));
+            editor.putStringSet(PREF_FAV_KEY, favourites);
+            editor.commit();
+            Toast.makeText(context, "Removed to favorite list", Toast.LENGTH_SHORT).show();
+        }
+    }
 
     public static String getPreferredSortOrder(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
