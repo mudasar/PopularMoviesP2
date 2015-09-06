@@ -32,7 +32,7 @@ public class DetailsActivity extends ActionBarActivity {
         setContentView(R.layout.activity_details);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new DetailsFragment())
+                    .add(R.id.movie_detail_container, new DetailsFragment())
                     .commit();
         }
     }

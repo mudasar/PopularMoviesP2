@@ -166,9 +166,10 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         if (sortOrderSetting.equals("favourites")){
             String sortOrder = getString(R.string.sort_order_default) + " ASC";
             List<String> favMovies = Utility.getFavouriteMovies(getActivity());
-            String fav_selection = MovieContract.Movie._ID + " IN ( ? )";
             String movieIds = Joiner.on(", ").join(favMovies);
-            return new CursorLoader(getActivity(), MovieContract.Movie.CONTENT_URI, null, fav_selection, new String[]{movieIds}, sortOrder);
+            String fav_selection = MovieContract.Movie._ID + " IN ( "+ movieIds +" )";
+
+            return new CursorLoader(getActivity(), MovieContract.Movie.CONTENT_URI, null, fav_selection, null, sortOrder);
         }else{
             String sortOrder = sortOrderSetting + " ASC";
             return new CursorLoader(getActivity(), MovieContract.Movie.CONTENT_URI, null, null, null, sortOrder);

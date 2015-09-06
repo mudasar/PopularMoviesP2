@@ -11,19 +11,44 @@ import android.view.MenuItem;
 
 public class MainActivity extends ActionBarActivity {
 
+    boolean mTwoPane = false;
+    private static final String DETAILFRAGMENT_TAG = "MDTAG";
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (savedInstanceState == null) {
+        if (findViewById(R.id.movie_detail_container) != null){
+
+            mTwoPane = true;
+
+            if (savedInstanceState == null){
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new MoviesFragment())
+                    .add(R.id.movie_detail_container, new DetailsFragment(), DETAILFRAGMENT_TAG)
+
                     .commit();
+            }
+        }else {
+            mTwoPane = false;
+
         }
+
+//        if (savedInstanceState == null) {
+//            getSupportFragmentManager().beginTransaction()
+//                    .add(R.id.fragment_movies, new MoviesFragment())
+//                    .commit();
+//        }
 
     }
 
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        DetailsFragment df = (DetailsFragment) getSupportFragmentManager().findFragmentById(R.id.movie_detail_container);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

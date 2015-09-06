@@ -1,5 +1,14 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:id="@+id/container"
-    android:layout_width="match_parent" android:layout_height="match_parent"
-    tools:context=".MainActivity" tools:ignore="MergeRootFrame" android:configChanges="orientation|screenSize"
-    android:icon="@drawable/movies_icon" />
+<fragment
+
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_movies"
+    android:name="uk.appinvent.popularmovies.MoviesFragment"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    tools:ignore="MergeRootFrame"
+    android:configChanges="orientation|screenSize"
+    android:icon="@drawable/movies_icon"
+
+    />

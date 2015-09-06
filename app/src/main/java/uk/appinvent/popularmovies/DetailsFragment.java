@@ -91,6 +91,10 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
             return null;
         }
 
+        if (intent.getData() == null){
+            return null;
+        }
+
         movieId = MovieContract.Movie.getMovieIdFromUri(intent.getData());
 
         switch (id){

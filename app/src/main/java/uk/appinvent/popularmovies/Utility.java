@@ -72,7 +72,7 @@ public class Utility {
         if (favourites == null){
             favourites = new HashSet<String>();
         }
-        if (!favourites.contains(Long.toString(movieId))){
+        if (favourites.contains(Long.toString(movieId))){
             favourites.remove(Long.toString(movieId));
             editor.putStringSet(PREF_FAV_KEY, favourites);
             editor.commit();
