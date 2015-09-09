@@ -3,13 +3,14 @@ package uk.appinvent.popularmovies;
 import android.content.Intent;
 import android.content.res.Configuration;
 
+import android.net.Uri;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements MoviesFragment.Callback {
 
     boolean mTwoPane = false;
     private static final String DETAILFRAGMENT_TAG = "MDTAG";
@@ -81,4 +82,25 @@ public class MainActivity extends ActionBarActivity {
     }
 
 
+    @Override
+    public void onItemSelected(Uri contentUri) {
+        if (mTwoPane) {
+            // In two-pane mode, show the detail view in this activity by
+            // adding or replacing the detail fragment using a
+            // fragment transaction.
+            Bundle args = new Bundle();
+            args.putParcelable(DetailsFragment.DETAIL_URI, contentUri);
+
+            DetailsFragment fragment = new DetailsFragment();
+            fragment.setArguments(args);
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.movie_detail_container, fragment, DETAILFRAGMENT_TAG)
+                    .commit();
+        } else {
+            Intent intent = new Intent(this, DetailsActivity.class)
+                    .setData(contentUri);
+            startActivity(intent);
+        }
+    }
 }

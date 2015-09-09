@@ -31,9 +31,17 @@ public class DetailsActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
         if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.movie_detail_container, new DetailsFragment())
-                    .commit();
+
+
+                Bundle arguments = new Bundle();
+                arguments.putParcelable(DetailsFragment.DETAIL_URI, getIntent().getData());
+
+                DetailsFragment fragment = new DetailsFragment();
+                fragment.setArguments(arguments);
+
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.movie_detail_container, fragment)
+                        .commit();
         }
     }
 }

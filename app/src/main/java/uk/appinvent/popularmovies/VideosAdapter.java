@@ -18,29 +18,41 @@ import uk.appinvent.popularmovies.data.MovieContract;
  */
 public class VideosAdapter extends CursorAdapter {
 
-    Context context;
 
     public VideosAdapter(Context context, Cursor c, boolean autoRequery) {
         super(context, c, autoRequery);
-        this.context = context;
-
     }
+
+    public static  class ViewHolder{
+
+        final TextView videoTextView ;
+
+        public ViewHolder(View view) {
+            videoTextView =(TextView)  view.findViewById(R.id.trailer_title_text);
+        }
+    }
+
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         View view = LayoutInflater.from(context).inflate(R.layout.video_list_view_item, parent, false);
 
+        ViewHolder viewHolder = new ViewHolder(view);
+        view.setTag(viewHolder);
         return view;
     }
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
 
-        if (view != null){
+        ViewHolder viewHolder = (ViewHolder) view.getTag();
 
+        int video_name_idx = cursor.getColumnIndex(MovieContract.Video.NAME);
+        String videoName = cursor.getString(video_name_idx);
+        if (viewHolder != null){
+            viewHolder.videoTextView.setText(videoName);
+        }else if(view != null) {
             TextView textView = (TextView) view.findViewById(R.id.trailer_title_text);
-            int video_name_idx = cursor.getColumnIndex(MovieContract.Video.NAME);
-            String videoName = cursor.getString(video_name_idx);
             textView.setText(videoName);
         }
 

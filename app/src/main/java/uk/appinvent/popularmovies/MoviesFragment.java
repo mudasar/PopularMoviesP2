@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -19,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.ListView;
 
 
 import com.google.common.base.Joiner;
@@ -42,6 +44,13 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
     boolean isLoaded = false;
     String savedSortOrder;
 
+    private int mPosition = GridView.INVALID_POSITION;
+
+
+    private static final String SELECTED_KEY = "selected_position";
+
+    private GridView gridView;
+
 
     public MoviesFragment() {
     }
@@ -62,6 +71,11 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
+
+        if (mPosition != GridView.INVALID_POSITION){
+            outState.putInt(SELECTED_KEY, mPosition);
+        }
+
         outState.putString("saved-sort-order", savedSortOrder);
         super.onSaveInstanceState(outState);
     }
@@ -130,26 +144,24 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
 
         View rootView =inflater.inflate(R.layout.fragment_movies, container, false);
 
-        GridView gridview = (GridView) rootView.findViewById(R.id.movies_grid_view);
+        gridView = (GridView) rootView.findViewById(R.id.movies_grid_view);
 
         final Context appContext = this.getActivity().getApplicationContext();
 
         imageAdapter = new ImageAdapter(appContext, null, 0);
 
-        gridview.setAdapter(imageAdapter);
+        gridView.setAdapter(imageAdapter);
 
-        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 Cursor cursor = (Cursor) parent.getItemAtPosition(position);
                 if (cursor != null) {
 
-                    Intent intent = new Intent(getActivity(), DetailsActivity.class)
-                            .setData(MovieContract.Movie.buildMovieUri(cursor.getLong(0)));
-
-                    startActivity(intent);
+                    ((Callback) getActivity()).onItemSelected(MovieContract.Movie.buildMovieUri(cursor.getLong(0)));
                 }
+                mPosition = position;
             }
         });
 
@@ -179,11 +191,21 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         imageAdapter.swapCursor(data);
+        if (mPosition != GridView.INVALID_POSITION){
+            gridView.smoothScrollToPosition(mPosition);
+        }
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         imageAdapter.swapCursor(null);
     }
+
+
+    public interface Callback {
+
+        public void onItemSelected(Uri contentUri);
+    }
+
 
 }

@@ -19,25 +19,46 @@ public class ReviewsAdapter extends CursorAdapter {
         super(context, c, flags);
     }
 
+
+    public static class ViewHolder{
+        final TextView reviewTextView ;
+        final TextView authorTextView;
+
+        public ViewHolder(View view){
+            reviewTextView = (TextView) view.findViewById(R.id.review_text_view);
+            authorTextView = (TextView) view.findViewById(R.id.author_text_view);
+        }
+    }
+
+
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         View view = LayoutInflater.from(context).inflate(R.layout.review_list_view_item, parent, false);
 
+        ViewHolder viewHolder = new ViewHolder(view);
+        view.setTag(viewHolder);
         return view;
     }
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        if (view != null){
+
+        int content_idx = cursor.getColumnIndex(MovieContract.Review.CONTENT);
+        String reviewTextContent = cursor.getString(content_idx);
+        int auth_idx = cursor.getColumnIndex(MovieContract.Review.AUTHOR);
+        String reviewAuthor = cursor.getString(auth_idx);
+
+        ViewHolder viewHolder = (ViewHolder) view.getTag();
+
+        if (viewHolder != null){
+
+            viewHolder.reviewTextView.setText(reviewTextContent);
+            viewHolder.authorTextView.setText(reviewAuthor);
+        }else if(view != null){
 
             TextView reviewText = (TextView) view.findViewById(R.id.review_text_view);
-            int content_idx = cursor.getColumnIndex(MovieContract.Review.CONTENT);
-            String reviewTextContent = cursor.getString(content_idx);
             reviewText.setText(reviewTextContent);
-
             TextView authorTextView = (TextView) view.findViewById(R.id.author_text_view);
-            int auth_idx = cursor.getColumnIndex(MovieContract.Review.AUTHOR);
-            String reviewAuthor = cursor.getString(auth_idx);
             authorTextView.setText(reviewAuthor);
         }
 

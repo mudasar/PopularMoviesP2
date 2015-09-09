@@ -31,6 +31,10 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
 
     private static final String LOG_TAG = DetailsFragment.class.getName();
 
+    static final String DETAIL_URI = "URI";
+
+    private Uri mUri;
+
     private long movieId = 0;
 
     private static final int DETAIL_LOADER = 0;
@@ -68,6 +72,14 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            mUri = arguments.getParcelable(DetailsFragment.DETAIL_URI);
+        }
+
+
         View rootView = inflater.inflate(R.layout.fragment_details, container, false);
 
 
@@ -87,15 +99,19 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
 
         Log.v(LOG_TAG, "In onCreateLoader");
         Intent intent = getActivity().getIntent();
-        if (intent == null) {
-            return null;
+
+
+        if (intent == null || intent.getData() == null){
+            if (mUri == null){
+                return null;
+            }
+            movieId = MovieContract.Movie.getMovieIdFromUri(mUri);
+        }else{
+            movieId = MovieContract.Movie.getMovieIdFromUri(intent.getData());
+            mUri = intent.getData();
         }
 
-        if (intent.getData() == null){
-            return null;
-        }
 
-        movieId = MovieContract.Movie.getMovieIdFromUri(intent.getData());
 
         switch (id){
             case DETAIL_LOADER:
@@ -103,7 +119,7 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
                 // creating a Cursor for the data being displayed.
                 return new CursorLoader(
                         getActivity(),
-                        intent.getData(),
+                        mUri,
                         null,
                         null,
                         null,
