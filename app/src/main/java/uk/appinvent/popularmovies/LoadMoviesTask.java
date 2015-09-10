@@ -36,7 +36,7 @@ public class LoadMoviesTask extends AsyncTask<String,Void, Void> {
     private static final String API_DETAIL_URL = "3/movie/";
     private String sort_method;
     //popular
-    private final static String API_KEY ="d1ef9dc0336bed3f42aa90354fdc4abf";
+    private static String API_KEY ="";
 
     private static final String LOG_TAG = LoadMoviesTask.class.getName();
 
@@ -44,6 +44,7 @@ public class LoadMoviesTask extends AsyncTask<String,Void, Void> {
 
     public LoadMoviesTask(Context context) {
         mContext = context;
+        API_KEY = mContext.getString(R.string.api_key);
     }
 
     private String makeAPIUrl(String sortOrder){

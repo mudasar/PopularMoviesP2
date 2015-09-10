@@ -189,9 +189,11 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
                                 if (Utility.isFavourite(getActivity(), movieId)){
                                     // remove from fav
                                     Utility.removeFavorite(getActivity(), movieId);
+                                    ((Button) v).setText("Mark As Favourite");
                                 }else{
                                     //add to fav
                                     Utility.addFavorite(getActivity(), movieId);
+                                    ((Button) v).setText("Remove Favourite");
                                 }
                             }
                         }
