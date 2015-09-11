@@ -8,8 +8,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
 import android.view.LayoutInflater;
+
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -17,7 +23,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RatingBar;
+
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -57,8 +65,51 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
     private static final int COL_VIDEO_NAME = 5;
 
 
-    public DetailsFragment() {
+    //menu
+    private static final String MOVIES_SHARE_HASHTAG = "#popularmovies";
+    private ShareActionProvider mShareActionProvider;
+    private static final String YOUTUBE_API = "https://www.youtube.com/watch" ;
+    private String YOUTUBE_KEY;
+    private int VIDEO_INDEX = 0;
 
+
+    public DetailsFragment() {
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        inflater.inflate(R.menu.detailsfragment_menu, menu);
+        MenuItem menuItem = menu.findItem(R.id.action_share);
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
+
+        // If onLoadFinished happens before this, we can go ahead and set the share intent now.
+        if (YOUTUBE_KEY != null) {
+            mShareActionProvider.setShareIntent(createShareForecastIntent());
+        }
+    }
+
+
+
+
+    private Intent createShareForecastIntent() {
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+        shareIntent.setType("text/plain");
+        Uri videoLocation = Uri.parse(YOUTUBE_API).buildUpon()
+                .appendQueryParameter("v", YOUTUBE_KEY)
+                .build();
+        shareIntent.putExtra(Intent.EXTRA_TEXT, MOVIES_SHARE_HASHTAG);
+        shareIntent.setData(videoLocation);
+
+        return shareIntent;
     }
 
     @Override
@@ -214,6 +265,16 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
 
                 Utility.setListViewHeightBasedOnChildren(videosListView);
 
+
+                if (VIDEO_INDEX == 0) {
+                    String videoKey = data.getString(COL_VIDEO_KEY);
+                    YOUTUBE_KEY = videoKey;
+                    if (mShareActionProvider != null){
+                        mShareActionProvider.setShareIntent(createShareForecastIntent());
+                    }
+                    VIDEO_INDEX++;
+                }
+
                 videosListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -226,23 +287,25 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
                             String key = cursor.getString(COL_VIDEO_KEY);
                             String site = cursor.getString(COL_VIDEO_SITE);
 
+
+
                             //if (site == "YouTube"){
 
-                                Uri videoLocation = Uri.parse("https://www.youtube.com/watch").buildUpon()
-                                        .appendQueryParameter("v", key)
-                                        .build();
-                                Intent intent = new Intent(Intent.ACTION_VIEW);
-                                intent.setData(videoLocation);
+                            Uri videoLocation = Uri.parse(YOUTUBE_API).buildUpon()
+                                    .appendQueryParameter("v", key)
+                                    .build();
+                            Intent intent = new Intent(Intent.ACTION_VIEW);
+                            intent.setData(videoLocation);
 
-                                if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
-                                    startActivity(intent);
-                                } else {
-                                    Log.d(LOG_TAG, "Couldn't call " + videoLocation + ", no receiving apps installed!");
-                                }
+                            if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+                                startActivity(intent);
+                            } else {
+                                Log.d(LOG_TAG, "Couldn't call " + videoLocation + ", no receiving apps installed!");
+                            }
 
-                           // }else{
-                         //       Log.d(LOG_TAG, "Video website "+ site +" is not supported in this version!");
-                         //   }
+                            // }else{
+                            //       Log.d(LOG_TAG, "Video website "+ site +" is not supported in this version!");
+                            //   }
                         }
                     }
                 });

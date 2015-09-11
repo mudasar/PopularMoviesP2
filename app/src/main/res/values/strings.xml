@@ -25,4 +25,5 @@
     <string name="trailer_title">Trailers</string>
     <string name="reviews_title">Reviews</string>
     <string name="api_key">d1ef9dc0336bed3f42aa90354fdc4abf</string>
+    <string name="action_share">Share</string>
 </resources>
